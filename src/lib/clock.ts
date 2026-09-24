@@ -1,24 +1,25 @@
 // Time-of-day text. Pure functions so they are trivially testable.
+// Day, month and greeting words come from the active string table (lib/strings.ts).
+
+import type {Strings} from './strings';
+import {fill} from './strings';
 
 export type TimeFormat = '12h' | '24h';
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-export function greeting (date: Date): string {
+export function greeting (date: Date, s: Strings): string {
 	const h = date.getHours();
-	if (h < 12) return 'Good morning';
-	if (h < 18) return 'Good afternoon';
-	return 'Good evening';
+	if (h < 12) return s.greetingMorning;
+	if (h < 18) return s.greetingAfternoon;
+	return s.greetingEvening;
 }
 
-export function dayName (date: Date): string {
-	return DAYS[date.getDay()];
+export function dayName (date: Date, s: Strings): string {
+	return s.days[date.getDay()];
 }
 
-/** "23 September" */
-export function dateText (date: Date): string {
-	return `${date.getDate()} ${MONTHS[date.getMonth()]}`;
+/** "23 September" / "23 de septiembre" */
+export function dateText (date: Date, s: Strings): string {
+	return fill(s.dateTemplate, {day: String(date.getDate()), month: s.months[date.getMonth()]});
 }
 
 export interface TimeParts {

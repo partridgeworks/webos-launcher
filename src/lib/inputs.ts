@@ -32,7 +32,8 @@ interface EimResponse extends LunaResponse {
 const FALLBACK_ICON = 'hdmigeneric.png';
 
 /** Live TV isn't an EIM device, but launching its app switches to the tuner, so it
- *  behaves like any other source. Port 0 sorts it ahead of HDMI 1. */
+ *  behaves like any other source. Port 0 sorts it ahead of HDMI 1. The label is
+ *  translated by the caller (see lib/strings.ts). */
 const LIVE_TV: InputSource = {
 	id: 'LIVE_TV',
 	appId: SYSTEM_APP.liveTv,
@@ -42,9 +43,10 @@ const LIVE_TV: InputSource = {
 	icon: 'tv.png'
 };
 
-export function listInputs (): Promise<InputSource[]> {
+export function listInputs (liveTvLabel: string): Promise<InputSource[]> {
+	const liveTv: InputSource = {...LIVE_TV, label: liveTvLabel};
 	return Promise.all([listExternalInputs(), appExists(LIVE_TV.appId)])
-		.then(([external, hasTuner]) => (hasTuner ? [LIVE_TV] : []).concat(external));
+		.then(([external, hasTuner]) => (hasTuner ? [liveTv] : []).concat(external));
 }
 
 function listExternalInputs (): Promise<InputSource[]> {
