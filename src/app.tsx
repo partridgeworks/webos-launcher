@@ -4,6 +4,7 @@ import {Settings, type SettingsTab} from './screens/Settings';
 import type {OptionItem} from './components/OptionList';
 import {Toast, type ToastMessage} from './components/Toast';
 import type {TileModel} from './components/Tile';
+import {useStrings} from './hooks/useStrings';
 import {listApps, type AppEntry} from './lib/apps';
 import {listInputs, MOCK_INPUTS, type InputSource} from './lib/inputs';
 import {launchApp, launchLgHome} from './lib/launch';
@@ -11,6 +12,7 @@ import {isWebOS} from './lib/luna';
 import {hidePointerOnForeground} from './lib/pointer';
 import {loadConfig, saveConfig, toggleId, type UserConfig} from './lib/storage';
 import {appTile, inputTile, pickInOrder} from './lib/tiles';
+import {fill} from './lib/strings';
 import {TIMING} from './config/constants';
 
 type Screen = 'home' | 'settings';
@@ -19,18 +21,19 @@ const ROW = {apps: 'apps', sources: 'sources', misc: 'misc'} as const;
 const MISC = {lgHome: 'lg-home', settings: 'settings'} as const;
 const OPTION = {useHomebrew: 'use-homebrew'} as const;
 
-const MISC_TILES: TileModel[] = [
-	{key: MISC.lgHome, label: 'LG Home', glyph: 'house'},
-	{key: MISC.settings, label: 'Settings', glyph: 'gear'}
-];
-
 export function App () {
+	const s = useStrings();
 	const [screen, setScreen] = useState<Screen>('home');
 	const [config, setConfig] = useState<UserConfig>(loadConfig);
 	const [apps, setApps] = useState<AppEntry[]>([]);
 	const [inputs, setInputs] = useState<InputSource[]>([]);
 	const [toast, setToast] = useState<ToastMessage | null>(null);
 	const toastTimer = useRef(0);
+
+	const miscTiles: TileModel[] = useMemo(() => [
+		{key: MISC.lgHome, label: s.lgHome, glyph: 'house'},
+		{key: MISC.settings, label: s.settings, glyph: 'gear'}
+	], [s]);
 
 	const showToast = useCallback((text: string, kind: ToastMessage['kind'] = 'info') => {
 		window.clearTimeout(toastTimer.current);
@@ -48,21 +51,21 @@ export function App () {
 		listApps(config.useHomebrew)
 			.then(({apps: list, source}) => {
 				setApps(list);
-				if (config.useHomebrew && source !== 'homebrew') showToast('Homebrew Channel not available, using the built-in app list', 'error');
+				if (config.useHomebrew && source !== 'homebrew') showToast(s.toastHomebrewUnavailable, 'error');
 			})
-			.catch(() => showToast('Could not read the app list', 'error'));
-	}, [config.useHomebrew, showToast]);
+			.catch(() => showToast(s.toastAppListFailed, 'error'));
+	}, [config.useHomebrew, showToast, s]);
 
 	useEffect(() => {
 		const refresh = () => {
 			if (!isWebOS()) { setInputs(MOCK_INPUTS); return; }
-			listInputs().then(setInputs).catch(() => showToast('Could not read the inputs', 'error'));
+			listInputs().then(setInputs).catch(() => showToast(s.toastInputsFailed, 'error'));
 		};
 		refresh();
 		const onVisibility = () => { if (!document.hidden) refresh(); };
 		document.addEventListener('visibilitychange', onVisibility);
 		return () => document.removeEventListener('visibilitychange', onVisibility);
-	}, [showToast]);
+	}, [showToast, s]);
 
 	const updateConfig = (next: UserConfig) => { setConfig(next); saveConfig(next); };
 
@@ -74,38 +77,38 @@ export function App () {
 	);
 
 	const rows: HomeRow[] = useMemo(() => [
-		{id: ROW.apps, label: 'Apps', items: shownApps.map(appTile), emptyText: 'No apps selected — add some in Settings'},
-		{id: ROW.sources, label: 'Sources', items: shownInputs.map(inputTile), emptyText: 'No sources selected'},
-		{id: ROW.misc, label: 'More', items: MISC_TILES}
-	], [shownApps, shownInputs]);
+		{id: ROW.apps, label: s.rowApps, items: shownApps.map(appTile), emptyText: s.emptyApps},
+		{id: ROW.sources, label: s.rowSources, items: shownInputs.map(inputTile), emptyText: s.emptySources},
+		{id: ROW.misc, label: s.rowMore, items: miscTiles}
+	], [shownApps, shownInputs, miscTiles, s]);
 
 	const tabs: SettingsTab[] = useMemo(() => [
-		{id: ROW.apps, label: 'Apps', noun: 'apps', items: apps.map(appTile), shown: shownApps.map(appTile)},
-		{id: ROW.sources, label: 'Sources', noun: 'sources', items: inputs.map(inputTile), shown: shownInputs.map(inputTile)}
-	], [apps, inputs, shownApps, shownInputs]);
+		{id: ROW.apps, label: s.tabApps, noun: s.nounApps, items: apps.map(appTile), shown: shownApps.map(appTile)},
+		{id: ROW.sources, label: s.tabSources, noun: s.nounSources, items: inputs.map(inputTile), shown: shownInputs.map(inputTile)}
+	], [apps, inputs, shownApps, shownInputs, s]);
 
 	const options: OptionItem[] = useMemo(() => [
 		{
 			id: OPTION.useHomebrew,
-			label: 'Live app list via Homebrew Channel',
-			description: 'Rooted TVs only. Lists every installed app with its real icon, using the Homebrew Channel, which runs commands as root. When off, the built-in app catalogue is used.',
+			label: s.optionUseHomebrew,
+			description: s.optionUseHomebrewDesc,
 			value: config.useHomebrew
 		}
-	], [config.useHomebrew]);
+	], [config.useHomebrew, s]);
 
 	// ----- actions -----
 	const open = (id: string, label: string) => {
-		launchApp(id).catch(() => showToast(`Couldn't open ${label}`, 'error'));
+		launchApp(id).catch(() => showToast(fill(s.toastOpenFailed, {label}), 'error'));
 	};
 
 	const onActivate = useCallback((rowId: string, item: TileModel) => {
 		if (rowId === ROW.misc) {
 			if (item.key === MISC.settings) setScreen('settings');
-			else if (item.key === MISC.lgHome) launchLgHome().catch(() => showToast("Couldn't open LG Home", 'error'));
+			else if (item.key === MISC.lgHome) launchLgHome().catch(() => showToast(s.toastLgHomeFailed, 'error'));
 			return;
 		}
 		open(item.key, item.label);
-	}, [showToast]);
+	}, [showToast, s]);
 
 	const onToggle = useCallback((tabId: string, key: string) => {
 		if (tabId === ROW.apps) {
