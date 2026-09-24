@@ -17,6 +17,8 @@ export interface Strings {
 	emptySources: string;
 	lgHome: string;
 	settings: string;
+	/** the tuner's source, shown ahead of the HDMI inputs */
+	liveTv: string;
 	tabApps: string;
 	tabSources: string;
 	nounApps: string;
@@ -55,6 +57,7 @@ export const EN: Strings = {
 	emptySources: 'No sources selected',
 	lgHome: 'LG Home',
 	settings: 'Settings',
+	liveTv: 'Live TV',
 	tabApps: 'Apps',
 	tabSources: 'Sources',
 	nounApps: 'apps',
@@ -89,17 +92,18 @@ export const ES: Strings = {
 	rowMore: 'Más',
 	emptyApps: 'No hay apps seleccionadas - añade alguna en Ajustes',
 	emptySources: 'No hay fuentes seleccionadas',
-	lgHome: 'LG Home',
+	lgHome: 'Inicio LG',
 	settings: 'Ajustes',
+	liveTv: 'TV en directo',
 	tabApps: 'Apps',
 	tabSources: 'Fuentes',
 	nounApps: 'apps',
 	nounSources: 'fuentes',
 	options: 'Opciones',
-	hintSelect: 'OK añade o quita un elemento · mantén OK para reordenar · Back vuelve a inicio',
+	hintSelect: 'OK añade o quita un elemento · mantén OK para reordenar · Atrás vuelve a inicio',
 	hintReorder: 'OK recoge un elemento · mantén OK o elige Terminar para finalizar',
-	hintHolding: 'Las flechas lo mueven · OK lo suelta · Back cancela',
-	hintOptions: 'OK activa o desactiva una opción · Back vuelve a inicio',
+	hintHolding: 'Las flechas lo mueven · OK lo suelta · Atrás cancela',
+	hintOptions: 'OK activa o desactiva una opción · Atrás vuelve a inicio',
 	settingsTitle: 'Ajustes',
 	done: 'Terminar',
 	reorderTemplate: 'Reordenar {noun}',
@@ -110,7 +114,7 @@ export const ES: Strings = {
 	toastAppListFailed: 'No se pudo leer la lista de apps',
 	toastInputsFailed: 'No se pudieron leer las entradas',
 	toastOpenFailed: 'No se pudo abrir {label}',
-	toastLgHomeFailed: 'No se pudo abrir LG Home'
+	toastLgHomeFailed: 'No se pudo abrir Inicio LG'
 };
 
 export type Locale = 'en' | 'es';

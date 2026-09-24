@@ -59,7 +59,7 @@ export function App () {
 	useEffect(() => {
 		const refresh = () => {
 			if (!isWebOS()) { setInputs(MOCK_INPUTS); return; }
-			listInputs().then(setInputs).catch(() => showToast(s.toastInputsFailed, 'error'));
+			listInputs(s.liveTv).then(setInputs).catch(() => showToast(s.toastInputsFailed, 'error'));
 		};
 		refresh();
 		const onVisibility = () => { if (!document.hidden) refresh(); };
