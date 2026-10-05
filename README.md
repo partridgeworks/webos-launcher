@@ -34,6 +34,12 @@ The launcher doesn't take over the HOME button. On a rooted TV you can map a but
 with [LG Input Hook](https://github.com/Simon34545/lginputhook) (app ID
 `works.partridge.webos-launcher`).
 
+On a compatible rooted TV, [native app-exit setup](docs/native-app-exit.md) can
+return to Launcher when an app exits without briefly displaying LG Home. This
+experimental, optional configuration was tested on a C2 running SDK 10.3.1;
+Home-button mapping remains separate. Read the compatibility and rollback notes
+before enabling it.
+
 ## Install
 
 **From the Homebrew Channel** (rooted TVs): search for *Launcher*.

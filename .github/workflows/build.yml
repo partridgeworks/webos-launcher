@@ -21,6 +21,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Test native app-exit setup and rollback
+        run: node --test test/native-app-exit.test.cjs
+
       # Type-check + Vite build (chrome79 target, classic script)
       - run: npm run build
 
